@@ -19,16 +19,17 @@ void display(linkedList *l)
     if (l == NULL)
     {
         printf("Linked list is empty.\n");
-        return;
     }
     else
     {
         linkedList *i = l;
+        printf("\n");
         while (i != NULL)
         {
             printf("%d -> ", i->data);
             i = i->next;
         }
+        printf("\n\n");
     }
 }
 linkedList *insertAtFirst(linkedList *l, int key)
@@ -104,7 +105,7 @@ linkedList *insertAtPosition(linkedList *l, int pos, int key)
     {
         return insertAtFirst(l, key);
     }
-    else if (pos > sizeOfLinkedList(l))
+    else if (pos > sizeOfLinkedList(l) || pos < 0)
     {
         printf("Position is invalid, You can't insert.\n");
         return l;
@@ -145,7 +146,7 @@ linkedList *insertAfter(linkedList *l, int n, int key)
     }
     if (flag == 0)
     {
-        printf("%d not found, so where to insert? I'm returning you linkedlist at it is.\n",n);
+        printf("%d not found, so where to insert? I'm returning you linkedlist at it is.\n", n);
         return l;
     }
     else
@@ -183,7 +184,7 @@ linkedList *insertBefore(linkedList *l, int n, int key)
     }
     if (flag == 0)
     {
-        printf("%d not found, so where to insert? I'm returning you linkedlist at it is.\n",n);
+        printf("%d not found, so where to insert? I'm returning you linkedlist at it is.\n", n);
         return l;
     }
     else
@@ -191,13 +192,18 @@ linkedList *insertBefore(linkedList *l, int n, int key)
         linkedList *ptr = l;
         linkedList *tmp = createNode(key);
 
-        while (ptr->next->data != n && ptr != NULL)
+        if (n == l->data)
+            return insertAtFirst(l, key);
+        else
         {
-            ptr = ptr->next;
+            while (ptr->next->data != n && ptr != NULL)
+            {
+                ptr = ptr->next;
+            }
+            tmp->next = ptr->next;
+            ptr->next = tmp;
+            return l;
         }
-        tmp->next = ptr->next;
-        ptr->next = tmp;
-        return l;
     }
 }
 
@@ -243,6 +249,11 @@ linkedList *deleteAtPosition(linkedList *l, int pos)
     }
     else if (pos == 1)
         return deleteAtFirst(l);
+    else if (pos > sizeOfLinkedList(l) || pos < 0)
+    {
+        printf("Position is invalid, You can't delete.\n");
+        return l;
+    }
     else
     {
         linkedList *ptr = l;
@@ -261,6 +272,10 @@ linkedList *deleteBefore(linkedList *l, int n)
     {
         printf("What to delete?\n");
         return l;
+    }
+    else if (l->next->data == n)
+    {
+        return deleteAtFirst(l);
     }
     else
     {
@@ -283,13 +298,21 @@ linkedList *deleteBefore(linkedList *l, int n)
     }
     else
     {
-        linkedList *ptr = l;
-        while (ptr->next->next->data != n && ptr != NULL)
+        if (l->data == n)
         {
-            ptr = ptr->next;
+            printf("Nothind to delete before %d.\n", n);
+            return l;
         }
-        ptr->next = ptr->next->next;
-        return l;
+        else
+        {
+            linkedList *ptr = l;
+            while (ptr->next->next->data != n && ptr != NULL)
+            {
+                ptr = ptr->next;
+            }
+            ptr->next = ptr->next->next;
+            return l;
+        }
     }
 }
 
@@ -322,23 +345,137 @@ linkedList *deleteAfter(linkedList *l, int n)
     }
     else
     {
-        linkedList *ptr = l;
-        while (ptr->data != n && ptr != NULL)
+        linkedList *i = l;
+
+        while (i->next != NULL)
+            i = i->next;
+        if (i->data == n)
         {
-            ptr = ptr->next;
+            printf("Nothind to delete after %d.\n", n);
+            return l;
         }
-        ptr->next = ptr->next->next;
+        else
+        {
+            linkedList *ptr = l;
+            while (ptr->data != n && ptr != NULL)
+            {
+                ptr = ptr->next;
+            }
+            ptr->next = ptr->next->next;
+            return l;
+        }
+    }
+}
+int numberOfNodes(linkedList *l, int key)
+{
+    int count = 0;
+    if (searchNode(l, key))
+    {
+        linkedList *i = l;
+        while (i->next != NULL)
+        {
+            if (i->data == key)
+            {
+                count++;
+            }
+            i = i->next;
+        }
+        return count;
+    }
+    else
+    {
+        return count;
+    }
+}
+linkedList *deleteFirstOccurence(linkedList *l, int key)
+{
+    if (l == NULL)
+        printf("Nothing to delete, Linked list is empty.\n");
+    else if (searchNode(l, key))
+    {
+        if (numberOfNodes(l, key) >= 2)
+        {
+            linkedList *i = l;
+            while (i->next != NULL)
+            {
+                if (i->next->data == key)
+                {
+                    break;
+                }
+                i = i->next;
+            }
+
+            i->next = i->next->next;
+            return i;
+        }
+        else
+        {
+            printf("You have only one node, can't delete.\n");
+            return l;
+        }
+    }
+    else
+    {
+        printf("Data you want to delete not found.\n");
         return l;
     }
 }
+int lastNode(linkedList *l)
+{
+    linkedList *i = l;
+    while (i->next != NULL)
+        i = i->next;
+    return i->data;
+}
+linkedList *deleteAllOccurence(linkedList *l, int key)
+{
+    if (l == NULL)
+        printf("Nothing to delete, Linked list is empty.\n");
+    else if (searchNode(l, key))
+    {
+        if (l->data == key)
+        {
+            l = deleteAtFirst(l);
+            l = deleteAllOccurence(l, key);
+        }
+        else if (lastNode(l) == key)
+        {
+            l = deleteAtLast(l);
+            l = deleteAllOccurence(l, key);
+        }
+        else
+        {
+            linkedList *i = l;
+            while (i->next != NULL)
+            {
+                if (i->next->data == key)
+                {
+                    break;
+                }
+                i = i->next;
+            }
+
+            i->next = i->next->next;
+            l = deleteAllOccurence(l, key); // that golden line
+            return i;
+        }
+    }
+    
+}
 void main()
 {
-    linkedList *l = createNode(3);
-    l = insertAtLast(l, 4);
-    l = insertAtLast(l, 5);
-    l = insertAtLast(l, 6);
-    l = insertAtLast(l, 7);
-    l = deleteAfter(l, 3);
-    printf("Size of LL : %d\n", sizeOfLinkedList(l));
+    linkedList *l = NULL;
+
+    l = insertAtLast(l, 20); //
+    l = insertAtLast(l, 10);
+    l = insertAtLast(l, 30);
+    l = insertAtLast(l, 20); //
+    l = insertAtLast(l, 50);
+    l = insertAtLast(l, 60);
+    l = insertAtLast(l, 20); //
+
+    l = deleteAllOccurence(l, 20);
     display(l);
 }
+
+// 20 -> 10 -> 30 -> 20 -> 50 -> 60 -> 20 ->
